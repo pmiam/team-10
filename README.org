@@ -1,1 +1,25 @@
 #+TITLE: Automating Identification of Microscopic Features
+
+* installation
+
+** developer
+
+Install the [[https://pixi.sh/][pixi language manager]] for your system
+
+Then, clone this repo or your own fork
+: cd ~/src
+: git clone https://github.com/<pmiam-or-your-user>/team-10.git
+: cd team-10
+
+Generate your own project environment from the included =pixi.lock=
+: pixi install
+
+Use pixi to run programs in the development environment e.g.
+: pixi run python
+(optional) direnv users can activate the environment by running
+: direnv allow
+This essentially links your shell's python command to the correct env
+
+To add or change dependencies for your feature, use the commands
+: pixi add <conda-dep>
+: pixi add --pypi <pypi-dep>
