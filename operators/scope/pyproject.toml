@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "team10-microscope"
+version = "0.1.0"
+description = ""
+authors = ["Sam Welborn <swelborn@lbl.gov>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyro5 = "^5.15"
+scifireaders = "^0.11.6"
+sidpy = "^0.12.3"
+pynsid = "^0.0.7.2"
+dtmicroscope = { git = "https://github.com/swelborn/DTMicroscope.git", branch = "remove-unused" }
+igor2 = "^0.5.9"
+gwyfile = "^0.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
