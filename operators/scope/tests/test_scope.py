@@ -9,8 +9,6 @@ import numpy as np
 import Pyro5.api
 import Pyro5.errors
 import pytest
-import SciFiReaders as sr
-import sidpy
 from DTMicroscope.server.server_afm import main_server
 
 HERE = pathlib.Path(__file__).parent
@@ -50,14 +48,15 @@ def test_load_data(run_server):
                 raise
     mic_server.setup_microscope()
     info = mic_server.get_dataset_info()
-    mic_server.go_to(0, 5)
     print(info)
+    array_list, shape, dtype = mic_server.get_scan(
+        channels=["HeightRetrace"],
+    )
+    arr1 = np.array(array_list, dtype=dtype).reshape(shape)
 
+    array_list, shape, dtype = mic_server.get_scan(channels=["Channel_000"])
+    arr2 = np.array(array_list, dtype=dtype).reshape(shape)
 
-def test_load_numpy_array():
-    for file_path in H5_FILES[1:]:
-        reader = sr.NSIDReader(file_path)
-        data = reader.read()
-        data = cast(sidpy.Dataset, data["Channel_000"])
-        arr = np.array(data[:])
-        assert isinstance(arr, np.ndarray)
+    assert arr1.shape == arr2.shape
+    assert arr1.dtype == arr2.dtype
+    assert np.allclose(arr1, arr2)
