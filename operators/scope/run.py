@@ -88,15 +88,24 @@ def deps():
     process.join()
 
 
+sent_first = False
+
+
 @operator
 def afm_microscope(
     inputs: BytesMessage | None, parameters: dict[str, Any]
 ) -> BytesMessage | None:
-    global MIC_SERVER, the_dataset_info, the_data
+    global MIC_SERVER, the_dataset_info, the_data, sent_first
     meta1 = the_dataset_info.model_dump()
     meta2 = OtherMetadata(
         path=the_file, shape=the_data.shape, dtype=str(the_data.dtype)
     ).model_dump()
     meta = {**meta1, **meta2}
     header = MessageHeader(subject=MessageSubject.BYTES, meta=meta)
+    if sent_first:
+        time.sleep(5)
+        print("Sending image")
+    else:
+        print("Sending first image")
+        sent_first = True
     return BytesMessage(header=header, data=the_data.tobytes())
