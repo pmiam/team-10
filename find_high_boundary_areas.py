@@ -3,26 +3,13 @@ import matplotlib.pyplot as plt
 from scipy import signal
 
 # Common edge detection method for grayscale images (perfect for this)
-def find_high_boundary_areas(mask, num_targets=10):
-    roll_up = np.roll(mask, 1, axis=0)
-    roll_down = np.roll(mask, -1, axis=0)
-    roll_left = np.roll(mask, 1, axis=1)
-    roll_right = np.roll(mask, -1, axis=1)
-
-    up = (mask==roll_up).astype(int)
-    down = (mask==roll_down).astype(int)
-    left = (mask==roll_left).astype(int)
-    right = (mask==roll_right).astype(int)
-
-    edges = up*down*left*right
-    #plt.matshow(edges)
+def find_high_boundary_areas(mask : np.ndarray, num_targets : int = 10) -> np.ndarray :
 
     # Convolve kernel with edges to find regions with highest density of boundaries
     ks = 10 # kernel size
     kernel2d = np.ones((ks,ks))
 
     boundary_density = signal.convolve2d(mask, kernel2d, mode='same', boundary='fill')
-    #plt.matshow(boundary_density)
 
     # Generate scan target coordinates
     scan_size = 10
@@ -42,5 +29,4 @@ def find_high_boundary_areas(mask, num_targets=10):
 
         coords[ii] = coord
 
-    plt.matshow(target_map)
     return coords
