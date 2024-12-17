@@ -7,15 +7,17 @@ import DTMicroscope.server.server_afm
 import numpy as np
 import Pyro5.api
 import Pyro5.errors
-from core.models.messages import BytesMessage, MessageHeader, MessageSubject
 from DTMicroscope.server.server_afm import main_server
+from pydantic import BaseModel, ConfigDict
+
+from core.models.messages import BytesMessage, MessageHeader, MessageSubject
 from operators.operator import DATA_DIRECTORY, dependencies, operator
-from pydantic import BaseModel
 
 data_dir = pathlib.Path(DATA_DIRECTORY) / "data"
 
 
 class OtherMetadata(BaseModel):
+    model_config: ConfigDict = ConfigDict(extra="ignore")
     path: pathlib.Path
     shape: tuple[int, ...]
     dtype: str
