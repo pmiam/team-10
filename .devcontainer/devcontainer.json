@@ -3,7 +3,7 @@
 {
 	"name": "afm-scope",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "samwelborn/scope-operator:aea715",
+	"image": "samwelborn/scope-operator:4b121d",
 	"features": {
 		"ghcr.io/devcontainers/features/git:1": {}
 	},
