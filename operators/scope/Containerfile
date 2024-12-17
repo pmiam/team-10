@@ -11,5 +11,3 @@ COPY operators/scope/team10_microscope/ ./team10_microscope/
 RUN poetry install --only main
 
 COPY operators/scope/run.py /app/run.py
-
-ENTRYPOINT [""]
