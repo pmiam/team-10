@@ -1,6 +1,6 @@
 {
     "id": "12345228-0001-0001-0000-1234567890ab",
-    "image": "samwelborn/scope-operator:4b121d",
+    "image": "samwelborn/scope-operator:b57b1d",
     "label": "Microscope Operator",
     "description": "Operates an AFM",
     "outputs": [
