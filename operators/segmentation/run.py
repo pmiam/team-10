@@ -5,8 +5,9 @@ import numpy as np
 from cellSAM import segment_cellular_image
 from core.logger import get_logger
 from core.models.messages import BytesMessage
-from operators.operator import operator
 from pydantic import BaseModel, ConfigDict
+
+from operators.operator import operator
 
 logger = get_logger()
 
@@ -27,7 +28,7 @@ def normalize_image(data: np.ndarray) -> np.ndarray:
     return (data - np.min(data)) / np.ptp(data)
 
 
-def str_to_bool(s):
+def str_to_bool(s) -> bool:
     if isinstance(s, bool):
         return s
     if isinstance(s, str):
@@ -47,6 +48,10 @@ def segmenter(
         other_metadata.shape
     )
 
+    if data is None:
+        logger.error("Data is None")
+        return None
+
     if data.ndim == 3:
         print("Data is 3D, selecting first channel")
         data = data[0]
@@ -62,5 +67,14 @@ def segmenter(
     normalize = str_to_bool(normalize)
 
     print(f"Segmenting image with parameters: {parameters}")
-    mask, _, _ = segment_cellular_image(data, normalize=normalize)
+    try:
+        mask, _, _ = segment_cellular_image(data, normalize=normalize)
+    except Exception as e:
+        logger.error(f"Error segmenting image: {e}")
+        return None
+
+    if mask is None:
+        logger.info("No mask returned")
+        return None
+
     return BytesMessage(header=header, data=mask.tobytes())
