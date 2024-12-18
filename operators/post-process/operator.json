@@ -1,6 +1,6 @@
 {
     "id": "12146328-0001-0001-0000-1234567890ab",
-    "image": "samwelborn/post-process:4c136f",
+    "image": "samwelborn/post-process:fcd581",
     "label": "Mask post-processor",
     "description": "Uses mask to find features of interest",
     "inputs": [
