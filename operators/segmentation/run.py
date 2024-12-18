@@ -5,9 +5,8 @@ import numpy as np
 from cellSAM import segment_cellular_image
 from core.logger import get_logger
 from core.models.messages import BytesMessage
-from pydantic import BaseModel, ConfigDict
-
 from operators.operator import operator
+from pydantic import BaseModel, ConfigDict
 
 logger = get_logger()
 
@@ -58,11 +57,6 @@ def segmenter(
 
     assert data.ndim == 2, f"Data must be 2D, got {data.ndim}D data"
 
-    meta = OtherMetadata(
-        path=other_metadata.path, shape=data.shape, dtype=str(data.dtype)
-    )
-    header = inputs.header
-    header.meta.update(meta.model_dump())
     normalize = parameters.get("normalize", True)
     normalize = str_to_bool(normalize)
 
@@ -76,5 +70,11 @@ def segmenter(
     if mask is None:
         logger.info("No mask returned")
         return None
+
+    meta = OtherMetadata(
+        path=other_metadata.path, shape=mask.shape, dtype=str(mask.dtype)
+    )
+    header = inputs.header
+    header.meta.update(meta.model_dump())
 
     return BytesMessage(header=header, data=mask.tobytes())
