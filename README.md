@@ -33,6 +33,8 @@ Our goals were as follows:
 
     - **[Microscope movement](operators/scope-downstream)**: this operator takes in the list of coordinates and "moves" to a particular location in the sample and scans around it. This is a fake operator for the time being as we didn't have time to implement a continuous feedback loop. In production, the output of the mask analysis operator would go back to the original microscope operator.
 
+    Note that there are some additional `README`s inside of [operators](operators/) for more information.
+
 4. Panos developed and understood DTMicroscope to collect scans in a particular range.
 
 After building all of these containers and launching them with `interactEM`, we have the following:
