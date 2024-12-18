@@ -2,12 +2,12 @@
 
 ## Team members
 
-Sam Welborn (NERSC/NCEM): team leader
-Mikolaj Jakowski
-Shawn Patrick
-Alex Pattison (NCEM)
-Panos Manganaris
-Sirisha Madugula
+- Sam Welborn (NERSC/NCEM): team leader
+- Mikolaj Jakowski
+- Shawn Patrick
+- Alex Pattison (NCEM)
+- Panos Manganaris
+- Sirisha Madugula
 
 ## Goals
 
