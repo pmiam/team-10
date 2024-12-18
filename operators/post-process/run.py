@@ -18,14 +18,13 @@ class GrainSizeSetting(str, Enum):
 def select_samples_grain_size(
     mask: np.ndarray, parameters: dict[str, Any]
 ) -> list[list[int]]:
-    print("Selecting samples by grain size")
     no_of_bins = int(parameters.get("num_bins", 10))
 
     num_samples = int(parameters.get("num_samples", 1))
     setting = parameters.get("setting", GrainSizeSetting.HIGHEST)
-    print(parameters)
+
     # Find the sizes of the different particles
-    sizes = np.zeros(np.max(mask) + 1)
+    sizes = np.zeros(int(np.max(mask) + 1))
 
     for bin_num in range(np.max(mask) + 1):
         sizes[bin_num] = np.count_nonzero(mask == bin_num)
@@ -43,25 +42,22 @@ def select_samples_grain_size(
     for bin_num in range(no_of_bins):
         bounds = (bin_boundaries[bin_num], bin_boundaries[bin_num + 1])
         bool_arr = np.array([sizes_new >= bounds[0], sizes_new < bounds[1]])
-        size_args.append(list(np.argwhere(bool_arr.all(0)).T[0]))
+        indices = list(np.argwhere(bool_arr.all(0)).T[0])
+        size_args.append(indices)
 
     # Take samples from each bin
     sample_list: list[list[int]] = []
 
     for bin_num in range(no_of_bins):
-        # print(bin_num)
         if len(size_args[bin_num]) > num_samples:
-            sample_list.append(
-                list(
-                    np.random.choice(
-                        size_args[bin_num], size=num_samples, replace=False
-                    )
-                )
+            samples = list(
+                np.random.choice(size_args[bin_num], size=num_samples, replace=False)
             )
+            sample_list.append(samples)
         else:
             sample_list.append(size_args[bin_num])
 
-    # Find the pixel co-ordinates of these samples
+    # Find the pixel coordinates of these samples
     coords = []
 
     if setting == GrainSizeSetting.HIGHEST:
@@ -74,9 +70,10 @@ def select_samples_grain_size(
     coord_ii = []
     for sample_num in range(len(sl)):
         mask_ii = mask == (bin_num + 1)
-        coord_ii.append(center_of_mass(mask_ii))
-    coords.append(coord_ii)
+        coord = center_of_mass(mask_ii)
+        coord_ii.append(coord)
 
+    coords.append(coord_ii)
     return coords
 
 
@@ -84,19 +81,20 @@ def select_samples_grain_size(
 def find_high_boundary_areas(
     mask: np.ndarray, parameters: dict[str, Any]
 ) -> list[list[int]]:
-    print("Selecting samples by grain boundaries")
+    print("Function: find_high_boundary_areas")
+
     # Convolve kernel with edges to find regions with the highest density of boundaries
     ks = 10  # Kernel size
     kernel2d = np.ones((ks, ks))
+    print("Kernel size:", ks)
 
     boundary_density = signal.convolve2d(mask, kernel2d, mode="same", boundary="fill")
 
     # Generate scan target coordinates
     scan_size = 10
-    num_targets = parameters.get("num_targets", 10)
-    target_map = boundary_density.copy()
+    num_targets = int(parameters.get("num_targets", 10))
 
-    # Initialize the coordinates list
+    target_map = boundary_density.copy()
     coords: list[list[int]] = []
 
     for _ in range(num_targets):
@@ -141,6 +139,7 @@ def mask_operation(
         return None
 
     other_metadata = OtherMetadata(**inputs.header.meta)
+
     mask = np.frombuffer(inputs.data, dtype=other_metadata.dtype).reshape(
         other_metadata.shape
     )
@@ -155,7 +154,10 @@ def mask_operation(
     }
     method = method_map[param_method]
 
-    data = method(mask, parameters)
+    try:
+        data = method(mask, parameters)
+    except Exception:
+        raise  # Reraise the error for further handling if needed
 
     data_np = np.array(data)
 
@@ -164,4 +166,6 @@ def mask_operation(
     )
     header = inputs.header
     header.meta.update(meta.model_dump())
+    print("Found coordinates:", data_np)
+
     return BytesMessage(header=header, data=data_np.tobytes())
