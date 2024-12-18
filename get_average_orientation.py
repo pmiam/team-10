@@ -1,5 +1,6 @@
 #function to find the average orientation of the grain
 import numpy as np
+import matplotlib.pyplot as plt
 
 def get_avg_orientation(mask : np.ndarray) -> float:
     slopes_list = []
@@ -11,8 +12,8 @@ def get_avg_orientation(mask : np.ndarray) -> float:
         grain_coords = []
 
         indexes = np.where(mask == i)
-        indexes_x = indexes[0]
-        indexes_y = indexes[1]
+        indexes_y = indexes[0]
+        indexes_x = indexes[1]
 
         m, b = np.polyfit(indexes_x, indexes_y, 1)
 
