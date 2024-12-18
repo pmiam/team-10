@@ -7,11 +7,9 @@ import DTMicroscope.server.server_afm
 import numpy as np
 import Pyro5.api
 import Pyro5.errors
-from DTMicroscope.server.server_afm import main_server
-from pydantic import BaseModel, ConfigDict
-
 from core.models.messages import BytesMessage, MessageHeader, MessageSubject
 from operators.operator import DATA_DIRECTORY, dependencies, operator
+from pydantic import BaseModel, ConfigDict
 
 
 class OtherMetadata(BaseModel):
@@ -46,16 +44,32 @@ class DatasetInfo(BaseModel):
             raise ValueError(f"Missing key in info: {e}")
 
 
-URI = "PYRO:microscope.server@localhost:9092"
+URI = "PYRO:microscope.server@localhost:9091"
 MIC_SERVER = Pyro5.api.Proxy(URI)
 MIC_SERVER = cast(DTMicroscope.server.server_afm.MicroscopeServer, MIC_SERVER)
 the_file = pathlib.Path(DATA_DIRECTORY) / "data.h5"
+if not the_file.exists():
+    print(f"File {the_file} does not exist")
 the_dataset_info: DatasetInfo = DatasetInfo()
 the_data = np.random.rand(10, 10)
 
 
 @dependencies
 def deps():
+    # This is a cluge: we already have a server running in the other operator.
+    # We previously tried to connect to it through this operator, but got the following error:
+    # Error in kernel: the calling thread is not the owner of this proxy, create a new proxy in this thread or transfer ownership.
+    # So here, we make a new server in this operator and connect to it.
+    def main_server():
+        host = "0.0.0.0"
+        daemon = Pyro5.api.Daemon(port=9091)
+        uri = daemon.register(
+            DTMicroscope.server.server_afm.MicroscopeServer,
+            objectId="microscope.server",
+        )
+        print("Server is ready. Object uri =", uri)
+        daemon.requestLoop()
+
     process = multiprocessing.Process(target=main_server)
     process.start()
     global MIC_SERVER, the_data, the_dataset_info
@@ -85,24 +99,62 @@ def deps():
     process.join()
 
 
-sent_first = False
+def get_data_around_coordinate(
+    arr: np.ndarray, coordinate: tuple[int, int], size: int = 20
+) -> np.ndarray:
+    y, x = coordinate
+    y = int(y)
+    x = int(x)
+
+    # Determine the boundaries of the sub-array
+    y_min = max(y - size, 0)
+    y_max = min(y + size, arr.shape[0])  # Height of the array
+    x_min = max(x - size, 0)
+    x_max = min(x + size, arr.shape[1])  # Width of the array
+
+    # Extract the data around the coordinate
+    return arr[y_min:y_max, x_min:x_max]
 
 
 @operator
 def afm_microscope(
     inputs: BytesMessage | None, parameters: dict[str, Any]
 ) -> BytesMessage | None:
-    global MIC_SERVER, the_dataset_info, the_data, sent_first
+    global MIC_SERVER, the_dataset_info, the_data
+    if inputs is None:
+        return None
+
+    other_metadata = OtherMetadata(**inputs.header.meta)
+    coords = np.frombuffer(inputs.data, dtype=other_metadata.dtype).reshape(
+        other_metadata.shape
+    )
+
+    print(coords)
+
+    if coords.ndim != 2:
+        raise ValueError("Coordinates must be 2D")
+
+    if coords.shape[1] != 2:
+        raise ValueError("Coordinates must have 2 columns")
+
+    the_place_to_go_to = coords[0]
+
+    # Coordinates should be in the form (y, x)
+    print("Going to coordinates", the_place_to_go_to)
+    # server.go_to(the_place_to_go_to[1], the_place_to_go_to[0])
+
+    # In the future, we will use code from daq-agent (see operators/scope) to
+    # extract a scan
+    print("Getting scan")
+    # data = server.get_scan(channels=["HeightRetrace"])
+
+    data = the_data.copy()
+    cropped_data = get_data_around_coordinate(data, the_place_to_go_to)
+
     meta1 = the_dataset_info.model_dump()
     meta2 = OtherMetadata(
-        path=the_file, shape=the_data.shape, dtype=str(the_data.dtype)
+        path=the_file, shape=cropped_data.shape, dtype=str(cropped_data.dtype)
     ).model_dump()
     meta = {**meta1, **meta2}
     header = MessageHeader(subject=MessageSubject.BYTES, meta=meta)
-    if sent_first:
-        time.sleep(60)
-        print("Sending image")
-    else:
-        print("Sending first image")
-        sent_first = True
-    return BytesMessage(header=header, data=the_data.tobytes())
+    return BytesMessage(header=header, data=cropped_data.tobytes())

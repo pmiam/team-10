@@ -10,4 +10,4 @@ RUN poetry install --no-root
 COPY operators/scope/team10_microscope/ ./team10_microscope/
 RUN poetry install --only main
 
-COPY operators/scope/run.py /app/run.py
+COPY operators/scope-downstream/run.py /app/run.py
