@@ -1,4 +1,4 @@
-#function to find the average orientation of the grains
+#function to find the average orientation of the grain
 import numpy as np
 
 def get_avg_orientation(mask : np.ndarray) -> float:
