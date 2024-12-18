@@ -13,8 +13,6 @@ from pydantic import BaseModel, ConfigDict
 from core.models.messages import BytesMessage, MessageHeader, MessageSubject
 from operators.operator import DATA_DIRECTORY, dependencies, operator
 
-data_dir = pathlib.Path(DATA_DIRECTORY) / "data"
-
 
 class OtherMetadata(BaseModel):
     model_config: ConfigDict = ConfigDict(extra="ignore")
@@ -51,10 +49,7 @@ class DatasetInfo(BaseModel):
 URI = "PYRO:microscope.server@localhost:9092"
 MIC_SERVER = Pyro5.api.Proxy(URI)
 MIC_SERVER = cast(DTMicroscope.server.server_afm.MicroscopeServer, MIC_SERVER)
-data_dir = pathlib.Path(DATA_DIRECTORY) / "data"
-filenames = data_dir.glob("*.h5")
-H5_FILES = cast(list, cast(str, [str(data_dir / f) for f in filenames]))
-the_file = H5_FILES[0]
+the_file = pathlib.Path(DATA_DIRECTORY) / "data.h5"
 the_dataset_info: DatasetInfo = DatasetInfo()
 the_data = np.random.rand(10, 10)
 
@@ -105,7 +100,7 @@ def afm_microscope(
     meta = {**meta1, **meta2}
     header = MessageHeader(subject=MessageSubject.BYTES, meta=meta)
     if sent_first:
-        time.sleep(5)
+        time.sleep(60)
         print("Sending image")
     else:
         print("Sending first image")

@@ -13,11 +13,11 @@
     ],
     "parameters": [
         {
-            "name": "data",
-            "label": "Data directory",
+            "name": "data.h5",
+            "label": "Data file",
             "type": "mount",
-            "default": "~/material1_perovksite/",
-            "description": "This is where the raw data files (*.h5) are located",
+            "default": "~/material1_perovksite/Image_10um_01.h5",
+            "description": "Raw data file to read in",
             "required": true
         }
     ]

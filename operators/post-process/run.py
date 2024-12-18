@@ -4,10 +4,11 @@ from typing import Any, Callable
 
 import numpy as np
 from core.models.messages import BytesMessage
-from operators.operator import operator
 from pydantic import BaseModel, ConfigDict
 from scipy import signal
 from scipy.ndimage import center_of_mass
+
+from operators.operator import operator
 
 
 class GrainSizeSetting(str, Enum):
@@ -161,11 +162,15 @@ def mask_operation(
 
     data_np = np.array(data)
 
+    # convert to 2D array
+    data_np = data_np[0]
+
     meta = OtherMetadata(
-        path=other_metadata.path, shape=data_np.shape, dtype=str(data_np.dtype)
+        path=other_metadata.path,
+        shape=data_np.shape,
+        dtype=str(data_np.dtype),
     )
     header = inputs.header
     header.meta.update(meta.model_dump())
-    print("Found coordinates:", data_np)
 
     return BytesMessage(header=header, data=data_np.tobytes())

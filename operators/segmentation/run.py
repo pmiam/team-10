@@ -5,8 +5,9 @@ import numpy as np
 from cellSAM import segment_cellular_image
 from core.logger import get_logger
 from core.models.messages import BytesMessage
-from operators.operator import operator
 from pydantic import BaseModel, ConfigDict
+
+from operators.operator import operator
 
 logger = get_logger()
 
