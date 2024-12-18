@@ -56,4 +56,4 @@ Image segmentation:
 Software development:
 
 1. Many members of our team were unfamiliar with team software development/use of github. They were introduced to this concept through pull request/review and are now experts, see: [#6](https://github.com/swelborn/team-10/pull/6) and [#7](https://github.com/swelborn/team-10/pull/7).
-2. We discussed the importance of type annotations in shared code.
+2. We discussed the importance of type annotations in shared code. One can see the impact of this in the extended functions that Miko and Shawn made ([#10](https://github.com/swelborn/team-10/pull/10), [#11](https://github.com/swelborn/team-10/pull/11), [#12](https://github.com/swelborn/team-10/pull/12)).
